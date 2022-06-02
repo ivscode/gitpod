@@ -5,14 +5,21 @@
 package main
 
 import (
-	"log"
+	"os"
+
+	"github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 
 	"github.com/gitpod-io/gitpod/previewctl/cmd"
 )
 
 func main() {
-	root := cmd.RootCmd()
+	logger := log.NewLogfmtLogger(log.NewSyncWriter(os.Stdout))
+	logger = log.With(logger, "ts", log.DefaultTimestampUTC)
+
+	root := cmd.RootCmd(logger)
 	if err := root.Execute(); err != nil {
-		log.Fatal(err)
+		level.Error(logger).Log("err", err)
+		os.Exit(1)
 	}
 }

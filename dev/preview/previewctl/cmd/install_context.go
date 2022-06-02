@@ -5,7 +5,10 @@
 package cmd
 
 import (
-	"log"
+	"os"
+
+	"github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 
 	"github.com/gitpod-io/gitpod/previewctl/pkg/preview"
 	"github.com/spf13/cobra"
@@ -15,17 +18,18 @@ var (
 	watch = false
 )
 
-func installContextCmd() *cobra.Command {
+func installContextCmd(logger log.Logger) *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:   "install-context",
 		Short: "Installs the kubectl context of a preview environment.",
 		Run: func(cmd *cobra.Command, args []string) {
-			p := preview.New(branch)
+			p := preview.New(branch, logger)
 
 			err := p.InstallContext(watch)
 			if err != nil {
-				log.Fatalf("Couldn't install context for the '%s' preview", p.Branch)
+				level.Error(logger).Log("msg", "Failed to install context", "branch", p.Branch, "err", err)
+				os.Exit(1)
 			}
 		},
 	}

@@ -7,33 +7,42 @@ package preview
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"log"
+	"fmt"
+	"os"
 	"os/exec"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/go-kit/log"
+	"github.com/go-kit/log/level"
 )
 
 type Preview struct {
 	Branch string
+
+	logger log.Logger
 }
 
-func New(branch string) *Preview {
+func New(branch string, logger log.Logger) *Preview {
 	if branch == "" {
 		out, err := exec.Command("git", "rev-parse", "--abbrev-ref", "HEAD").Output()
 		if err != nil {
-			log.Fatalf("Could not retrieve branch name, err: %v", err)
+			level.Error(logger).Log("msg", "Could not retrieve branch name", "err", err)
+			os.Exit(1)
 		}
 		branch = string(out)
 	} else {
 		_, err := exec.Command("git", "rev-parse", "--verify", branch).Output()
 		if err != nil {
-			log.Fatalf("Branch '%s' does not exist", branch)
+			level.Error(logger).Log("msg", "Branch does not exist", "branch", branch)
+			os.Exit(1)
 		}
 	}
 
 	return &Preview{
 		Branch: branch,
+		logger: logger,
 	}
 }
 
