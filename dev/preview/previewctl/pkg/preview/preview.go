@@ -7,7 +7,6 @@ package preview
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"fmt"
 	"os"
 	"os/exec"
 	"regexp"
@@ -57,10 +56,13 @@ func (p *Preview) InstallContext(watch bool) error {
 		for {
 			select {
 			case <-installTicker.C:
-				if err := installContext(p.Branch); err == nil {
-					// No error means successful context installation
-					return nil
+				err := installContext(p.Branch)
+				if err != nil {
+					level.Info(p.logger).Log("msg", "Failed to install context. Trying again in 30 seconds.", "branch", p.Branch)
+					continue
 				}
+				level.Info(p.logger).Log("msg", "Context installed.", "branch", p.Branch)
+				return nil
 			}
 		}
 	}
