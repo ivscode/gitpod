@@ -50,14 +50,14 @@ export class MetaInstanceController implements Disposable {
                     const timedOutInUnknown = now >= creationTime + this.config.timeouts.unknownPhaseSeconds * 1000;
                     const currentPhase = instance.latestInstance.status.phase;
 
-                    // log.debug(logContext, 'MetaInstanceController: Checking for workspaces to stop', {
-                    //     creationTime,
-                    //     stoppingTime,
-                    //     timedOutInPreparing,
-                    //     timedOutInStopping,
-                    //     timedOutInUnknown,
-                    //     currentPhase
-                    // });
+                    log.debug(logContext, "MetaInstanceController: Checking for workspaces to stop", {
+                        creationTime,
+                        stoppingTime,
+                        timedOutInPreparing,
+                        timedOutInStopping,
+                        timedOutInUnknown,
+                        currentPhase,
+                    });
 
                     if (
                         (currentPhase === "preparing" && timedOutInPreparing) ||
