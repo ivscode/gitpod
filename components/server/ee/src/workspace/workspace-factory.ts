@@ -30,6 +30,7 @@ import { ErrorCodes } from "@gitpod/gitpod-protocol/lib/messaging/error";
 import { HostContextProvider } from "../../../src/auth/host-context-provider";
 import { UserDB } from "@gitpod/gitpod-db/lib";
 import { UserCounter } from "../user/user-counter";
+import { increasePrebuildsCounter } from "../../../src/prometheus-metrics";
 
 @injectable()
 export class WorkspaceFactoryEE extends WorkspaceFactory {
@@ -176,6 +177,10 @@ export class WorkspaceFactoryEE extends WorkspaceFactory {
                 branch,
                 statusVersion: 0,
             });
+
+            if (pws) {
+                increasePrebuildsCounter(pws.state);
+            }
 
             log.debug(
                 { userId: user.id, workspaceId: ws.id },

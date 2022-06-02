@@ -18,6 +18,7 @@ export class PrometheusMetricsExporter {
     protected readonly clusterCordoned: prom.Gauge<string>;
     protected readonly statusUpdatesTotal: prom.Counter<string>;
     protected readonly stalePrebuildEventsTotal: prom.Counter<string>;
+    protected readonly prebuildsTotal: prom.Counter<string>;
 
     protected readonly workspaceInstanceUpdateStartedTotal: prom.Counter<string>;
     protected readonly workspaceInstanceUpdateCompletedSeconds: prom.Histogram<string>;
@@ -72,6 +73,12 @@ export class PrometheusMetricsExporter {
             // and outcomes by read-only replicas.
             labelNames: ["db_write", "workspace_cluster", "workspace_instance_type", "outcome"],
             buckets: prom.exponentialBuckets(2, 2, 8),
+        });
+
+        this.prebuildsTotal = new prom.Counter({
+            name: "gitpod_prebuilds_total",
+            help: "Counter of total prebuilds.",
+            labelNames: ["state"],
         });
     }
 
@@ -141,5 +148,9 @@ export class PrometheusMetricsExporter {
         this.workspaceInstanceUpdateCompletedSeconds
             .labels(String(dbWrite), workspaceCluster, WorkspaceType[type], outcome)
             .observe(durationSeconds);
+    }
+
+    increasePrebuildsCounter(state: string) {
+        this.prebuildsTotal.inc({ state });
     }
 }

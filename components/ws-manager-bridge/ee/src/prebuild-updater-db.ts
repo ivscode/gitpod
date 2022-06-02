@@ -78,6 +78,7 @@ export class PrebuildUpdaterDB implements PrebuildUpdater {
 
                 span.setTag("updatePrebuildWorkspace.prebuild.state", updatedPrebuild.state);
                 span.setTag("updatePrebuildWorkspace.prebuild.error", updatedPrebuild.error);
+                this.prometheusExporter.increasePrebuildsCounter(updatedPrebuild.state);
 
                 if (writeToDB) {
                     await this.workspaceDB.trace({ span }).storePrebuiltWorkspace(updatedPrebuild);

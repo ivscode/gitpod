@@ -151,3 +151,14 @@ const instanceStartsFailedTotal = new prometheusClient.Counter({
 export function increaseFailedInstanceStartCounter(reason: "clusterSelectionFailed" | "startOnClusterFailed") {
     instanceStartsFailedTotal.inc({ reason });
 }
+
+const prebuildsTotal = new prometheusClient.Counter({
+    name: "gitpod_prebuilds_total",
+    help: "Counter of total prebuilds.",
+    labelNames: ["state"],
+    registers: [prometheusClient.register],
+});
+
+export function increasePrebuildsCounter(state: string) {
+    prebuildsTotal.inc({ state });
+}
