@@ -11,6 +11,7 @@ import { Disposable, DisposableCollection, RunningWorkspaceInfo } from "@gitpod/
 import { MessageBusIntegration } from "./messagebus-integration";
 import { Configuration } from "./config";
 import { repeat } from "@gitpod/gitpod-protocol/lib/util/repeat";
+import { PrebuildUpdater } from "./prebuild-updater";
 
 @injectable()
 export class MetaInstanceController implements Disposable {
@@ -22,6 +23,9 @@ export class MetaInstanceController implements Disposable {
 
     @inject(WorkspaceDB)
     protected readonly workspaceDB: WorkspaceDB;
+
+    @inject(PrebuildUpdater)
+    protected readonly prebuildUpdater: PrebuildUpdater;
 
     protected readonly disposables = new DisposableCollection();
 
@@ -77,6 +81,8 @@ export class MetaInstanceController implements Disposable {
                             instance.workspace.ownerId,
                             instance.latestInstance,
                         );
+
+                        await this.prebuildUpdater.stopPrebuildInstance({}, instance.latestInstance);
                     }
                 } catch (err) {
                     log.warn(logContext, "MetaInstanceController: Error whilst stopping workspace instance", err);
