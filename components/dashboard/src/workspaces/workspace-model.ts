@@ -145,8 +145,12 @@ export class WorkspaceModel implements Disposable, Partial<GitpodClient> {
     }
 
     protected isActive(info: WorkspaceInfo): boolean {
+        const lastSessionStart = WorkspaceInfo.lastActiveISODate(info);
+        const twentyfourHoursAgo = new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString();
         return (
-            (info.workspace.pinned || (!!info.latestInstance && info.latestInstance.status?.phase !== "stopped")) &&
+            (info.workspace.pinned ||
+                (!!info.latestInstance && info.latestInstance.status?.phase !== "stopped") ||
+                twentyfourHoursAgo.localeCompare(lastSessionStart) < 0) &&
             !info.workspace.softDeleted
         );
     }
