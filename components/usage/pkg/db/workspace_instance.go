@@ -31,10 +31,11 @@ type WorkspaceInstance struct {
 	LastModified time.Time   `gorm:"column:_lastModified;type:timestamp;default:CURRENT_TIMESTAMP(6);" json:"_lastModified"`
 	StoppingTime VarcharTime `gorm:"column:stoppingTime;type:varchar;size:255;" json:"stoppingTime"`
 
-	LastHeartbeat  string         `gorm:"column:lastHeartbeat;type:varchar;size:255;" json:"lastHeartbeat"`
-	StatusOld      sql.NullString `gorm:"column:status_old;type:varchar;size:255;" json:"status_old"`
-	Status         datatypes.JSON `gorm:"column:status;type:json;" json:"status"`
-	Phase          sql.NullString `gorm:"column:phase;type:char;size:32;" json:"phase"`
+	LastHeartbeat string         `gorm:"column:lastHeartbeat;type:varchar;size:255;" json:"lastHeartbeat"`
+	StatusOld     sql.NullString `gorm:"column:status_old;type:varchar;size:255;" json:"status_old"`
+	Status        datatypes.JSON `gorm:"column:status;type:json;" json:"status"`
+	// Phase is derived from Status by extracting JSON from it. Read-only.
+	Phase          sql.NullString `gorm:"->:column:phase;type:char;size:32;" json:"phase"`
 	PhasePersisted string         `gorm:"column:phasePersisted;type:char;size:32;" json:"phasePersisted"`
 
 	// deleted is restricted for use by db-sync
@@ -48,10 +49,18 @@ func (d *WorkspaceInstance) TableName() string {
 
 func ListWorkspaceInstancesInRange(ctx context.Context, conn *gorm.DB, fromInclusive, toExclusive time.Time) ([]WorkspaceInstance, error) {
 	var instances []WorkspaceInstance
+	//SELECT * FROM `d_b_workspace_instance`
+	//WHERE (stoppedTime > '2022-06-01 00:00:00' OR stoppedTime = '')
+	//AND
+	//(creationTime < '2022-07-01 00:00:00') AND
+	//startedTime != ''
 	tx := conn.
 		WithContext(ctx).
-		Where("startedTime >= ?", fromInclusive).
-		Where("stoppedTime < ?", toExclusive).
+		Where(
+			conn.Where("stoppedTime >= ?", fromInclusive).Or("stoppedTime = ?", ""),
+		).
+		Where("creationTime < ?", toExclusive).
+		Where("creationTime != ?", "").
 		Find(&instances)
 	if tx.Error != nil {
 		return nil, fmt.Errorf("failed to list workspace instances: %w", tx.Error)
