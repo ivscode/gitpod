@@ -5,9 +5,12 @@
 package db
 
 import (
+	"context"
 	"database/sql"
+	"fmt"
 	"github.com/google/uuid"
 	"gorm.io/datatypes"
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -41,4 +44,18 @@ type WorkspaceInstance struct {
 // TableName sets the insert table name for this struct type
 func (d *WorkspaceInstance) TableName() string {
 	return "d_b_workspace_instance"
+}
+
+func ListWorkspaceInstancesInRange(ctx context.Context, conn *gorm.DB, fromInclusive, toExclusive time.Time) ([]WorkspaceInstance, error) {
+	var instances []WorkspaceInstance
+	tx := conn.
+		WithContext(ctx).
+		Where("startedTime >= ?", fromInclusive).
+		Where("stoppedTime < ?", toExclusive).
+		Find(&instances)
+	if tx.Error != nil {
+		return nil, fmt.Errorf("failed to list workspace instances: %w", tx.Error)
+	}
+
+	return instances, nil
 }
