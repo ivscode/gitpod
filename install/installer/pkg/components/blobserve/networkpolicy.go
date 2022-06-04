@@ -6,6 +6,7 @@ package blobserve
 
 import (
 	"github.com/gitpod-io/gitpod/installer/pkg/common"
+	ideproxy "github.com/gitpod-io/gitpod/installer/pkg/components/ide-proxy"
 	"github.com/gitpod-io/gitpod/installer/pkg/components/proxy"
 	wsproxy "github.com/gitpod-io/gitpod/installer/pkg/components/ws-proxy"
 
@@ -40,6 +41,10 @@ func networkpolicy(ctx *common.RenderContext) ([]runtime.Object, error) {
 				}, {
 					PodSelector: &metav1.LabelSelector{MatchLabels: map[string]string{
 						"component": wsproxy.Component,
+					}},
+				}, {
+					PodSelector: &metav1.LabelSelector{MatchLabels: map[string]string{
+						"component": ideproxy.Component,
 					}},
 				}},
 			}},
