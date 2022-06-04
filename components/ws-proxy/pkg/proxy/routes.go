@@ -726,10 +726,9 @@ func (t *blobserveTransport) redirect(image string, req *http.Request) (*http.Re
 }
 
 func (t *blobserveTransport) asBlobserveURL(image string, path string) string {
-	return fmt.Sprintf("%s://%s%s/%s%s%s",
+	return fmt.Sprintf("%s://ide.%s/blobserve/%s%s%s",
 		t.Config.GitpodInstallation.Scheme,
-		"blobserve",
-		t.Config.GitpodInstallation.WorkspaceHostSuffix,
+		t.Config.GitpodInstallation.HostName,
 		image,
 		imagePathSeparator,
 		path,
