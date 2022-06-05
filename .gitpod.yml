@@ -1,4 +1,5 @@
-image: eu.gcr.io/gitpod-core-dev/dev/dev-environment:me-me-image.1
+#image: eu.gcr.io/gitpod-core-dev/dev/dev-environment:me-me-image.1
+image: gitpod/workspace-full
 workspaceLocation: gitpod/gitpod-ws.code-workspace
 checkoutLocation: gitpod
 ports:
